@@ -1,0 +1,38 @@
+server:
+  port: 8084
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: spring-cloud-gateway-provider
+  cloud:
+    gateway:
+      routes:
+        - id: path_route
+          uri: http://127.0.0.1:8341
+          predicates:
+            - Path=/order/**
+          filters:
+          - StripPrefix=1
+logging:
+  level:
+    root: INFO
+  path: ./logs/gateway
+
+# SOFA CONFIG START
+com:
+  alipay:
+    env: shared
+    instanceid: xxxx
+  antcloud:
+    antvip:
+      endpoint: xxx
+    mw:
+      access: xxx
+      secret: xxx
+  sofa:
+    registry:
+      address: local:///Users/yuanshaopeng/localFileRegistry/localRegistry.reg
+run:
+  mode: DEV
+# SOFA CONFIG END
