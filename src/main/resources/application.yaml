@@ -1,10 +1,14 @@
 server:
   port: 8084
+
 spring:
   main:
     allow-bean-definition-overriding: true
   application:
     name: spring-cloud-gateway-provider
+  redis:
+    host: 127.0.0.1
+    port: 6379
   cloud:
     gateway:
       routes:
@@ -14,12 +18,29 @@ spring:
             - Path=/order/**
           filters:
           - StripPrefix=1
+
+# LOGGING Config
 logging:
   level:
     root: INFO
   path: ./logs/gateway
 
-# SOFA CONFIG START
+# Gateway config
+gateway:
+  store:
+    redis:
+      enable: true
+# Gateway ui | http://localhost:8080/actuator/gateway/routes
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+# SOFA config
 com:
   alipay:
     env: shared
@@ -35,4 +56,3 @@ com:
       address: local:///Users/yuanshaopeng/localFileRegistry/localRegistry.reg
 run:
   mode: DEV
-# SOFA CONFIG END
