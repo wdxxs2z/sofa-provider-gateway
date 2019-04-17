@@ -31,15 +31,18 @@ public class DynamicRouteService implements ApplicationEventPublisherAware {
     }
 
     // 添加路由
-    public ResponseResult add(GatewayRouteDefinition routeDefinition){
-        RouteDefinition rd = new RouteDefinition();
-        rd.setId(routeDefinition.getId());
-        rd.setUri(UriComponentsBuilder.fromUriString(
-                routeDefinition.getHostUrl()).build().toUri()
+    public ResponseResult add(GatewayRouteDefinition gatewayRouteDefinition){
+        RouteDefinition routeDefinition = new RouteDefinition();
+        routeDefinition.setId(gatewayRouteDefinition.getId());
+        routeDefinition.setUri(
+                UriComponentsBuilder.fromUriString(
+                        gatewayRouteDefinition.getHostUrl()
+                ).build().toUri()
         );
-        rd.setPredicates(routeDefinition.getPredicates());
-        rd.setFilters(routeDefinition.getFilters());
-        routeDefinitionWriter.save(Mono.just(rd)).subscribe();
+        routeDefinition.setPredicates(gatewayRouteDefinition.getPredicates());
+        routeDefinition.setFilters(gatewayRouteDefinition.getFilters());
+        routeDefinitionWriter.save(Mono.just(routeDefinition)).subscribe();
+        routeDefinitionWriter.save(Mono.just(routeDefinition)).subscribe();
         notifyChanged();
         return new ResponseResult();
     }
@@ -51,9 +54,9 @@ public class DynamicRouteService implements ApplicationEventPublisherAware {
     }
 
     // 更新路由
-    public ResponseResult update(GatewayRouteDefinition routeDefinition) {
-        this.delete(routeDefinition.getId());
-        this.add(routeDefinition);
+    public ResponseResult update(GatewayRouteDefinition gatewayRouteDefinition) {
+        this.delete(gatewayRouteDefinition.getId());
+        this.add(gatewayRouteDefinition);
         return new ResponseResult();
     }
 

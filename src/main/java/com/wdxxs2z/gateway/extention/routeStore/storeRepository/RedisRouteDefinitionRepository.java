@@ -13,6 +13,9 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * RouteDefinitionRepository 的redis实现
+ * */
 @Component
 public class RedisRouteDefinitionRepository implements RouteDefinitionRepository {
 
@@ -47,6 +50,18 @@ public class RedisRouteDefinitionRepository implements RouteDefinitionRepository
                 return Mono.empty();
             }
             return Mono.defer(() -> Mono.error(new NotFoundException("RouteDefinition not found: " + routeId)));
+        });
+    }
+
+    public Mono<RouteDefinition> findOne(Mono<String> routeId) {
+        return routeId.flatMap(id -> {
+           if (redisTemplate.opsForHash().hasKey(GATEWAY_ROUTES, id)){
+               String routeDefinitionJson = (String)redisTemplate.opsForHash().get(GATEWAY_ROUTES, id);
+               RouteDefinition routeDefinition = JSON.parseObject(routeDefinitionJson, RouteDefinition.class);
+               return Mono.justOrEmpty(routeDefinition);
+           }else {
+               return Mono.empty();
+           }
         });
     }
 }
