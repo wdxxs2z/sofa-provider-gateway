@@ -4,14 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.wdxxs2z.gateway.adapt.sofa.SofaProtocolAdapt;
 import com.wdxxs2z.gateway.extention.routeStore.domain.ResponseResult;
-import com.wdxxs2z.gateway.extention.routeStore.storeRepository.RedisRouteDefinitionRepository;
 import io.netty.buffer.ByteBufAllocator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.route.CachingRouteLocator;
 import org.springframework.cloud.gateway.route.Route;
-import org.springframework.cloud.gateway.route.RouteDefinition;
+import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -20,16 +18,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Resource;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Component
 public class SofaFilter implements GatewayFilter, Ordered {
 
     @Autowired
@@ -37,10 +36,7 @@ public class SofaFilter implements GatewayFilter, Ordered {
 
     // 热点路由，缓存器，不用我们自己实现缓存设计了
     @Autowired
-    CachingRouteLocator cachingRouteLocator;
-
-    @Resource
-    RedisRouteDefinitionRepository routeDefinitionWriter;
+    RouteLocator routeLocator;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -62,36 +58,31 @@ public class SofaFilter implements GatewayFilter, Ordered {
         // 获取请求参数, interfaceId, 路由的ID，接口注入的唯一标识
         String interfaceId = request.getQueryParams().getFirst("interfaceId");
 
-        // 获取路由信息，先从缓存里取，没有在从数据库里取
-        Route cacheRoute = cachingRouteLocator.getRoutes().toStream().filter(r -> r.getId().equals(interfaceId)).findFirst().get();
+        // 获取路由信息是否匹配
+        Route cacheRoute = routeLocator.getRoutes().toStream().filter(r -> r.getId().equals(interfaceId)).findFirst().get();
         if (cacheRoute == null) {
-            // 缓存没有路由
-            Mono<RouteDefinition> repositoryRoute = routeDefinitionWriter.findOne(Mono.just(interfaceId));
-            if (repositoryRoute.equals(Mono.empty())) {
-                // 路由没有存储
-                ServerHttpResponse response = exchange.getResponse();
-                ResponseResult respResult = new ResponseResult();
-                respResult.setCode(HttpStatus.NOT_FOUND.value());
-                respResult.setMessage("Rpc Service Route Not Found");
-                byte[] datas = JSON.toJSONString(respResult).getBytes(StandardCharsets.UTF_8);
-                DataBuffer buffer = response.bufferFactory().wrap(datas);
-                response.setStatusCode(HttpStatus.NOT_FOUND);
-                response.getHeaders().add("Content-Type", "application/json;charset=UTF-8");
-                return response.writeWith(Mono.just(buffer));
-            }
+            ServerHttpResponse response = exchange.getResponse();
+            ResponseResult respResult = new ResponseResult();
+            respResult.setCode(HttpStatus.NOT_FOUND.value());
+            respResult.setMessage("Rpc Service Route Not Found");
+            byte[] datas = JSON.toJSONString(respResult).getBytes(StandardCharsets.UTF_8);
+            DataBuffer buffer = response.bufferFactory().wrap(datas);
+            response.setStatusCode(HttpStatus.NOT_FOUND);
+            response.getHeaders().add("Content-Type", "application/json;charset=UTF-8");
+            return response.writeWith(Mono.just(buffer));
         }
+
+        // 获取请求参数并转换
         /**
          * 获取Post请求的json数据
          * {
          *  "interfaceName": "com.demo.provider.CallService",
          *  "method": "message",
-         *  "params": {
-         *      "java.lang.String": "hello",
-         *      "java.lang.Integer": 12355093322
-         *  }
+         *  "params": [
+         *      {"java.lang.String": "hello"},{"java.lang.Integer": 12355093322}
+         *  ]
          * }
          * */
-        // 获取请求参数并转换
         String bodyContent = resolveBodyFromRequest(request);
         Map<String, Object> requestObject = JSON.parseObject(bodyContent, new TypeReference<Map<String, Object>>() {
         });

@@ -6,7 +6,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = "com.wdxxs2z.gateway.*")
+@ComponentScan(basePackages = "com.wdxxs2z.gateway")
 public class GatewayApplication {
 
     public static void main(String[] args) {

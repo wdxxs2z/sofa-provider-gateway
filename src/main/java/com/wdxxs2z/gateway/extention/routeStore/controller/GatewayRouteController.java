@@ -3,10 +3,7 @@ package com.wdxxs2z.gateway.extention.routeStore.controller;
 import com.wdxxs2z.gateway.extention.routeStore.domain.GatewayRouteDefinition;
 import com.wdxxs2z.gateway.extention.routeStore.domain.ResponseResult;
 import com.wdxxs2z.gateway.extention.routeStore.routeService.DynamicRouteService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -17,15 +14,19 @@ public class GatewayRouteController {
     private DynamicRouteService routeService;
 
     /**
-     * {
-        "id": "com.wdxxs2z.gateway.bundle.callMessage",
-        "hostUrl:" "127.0.0.1:9987",
-        "path": "/rpc"
-        "predicates": [{"name": "", "args": {}}],
-        "filters": [{"name": "", "args": {}}]
-     * }
+    {
+    "id": "com.wdxxs2z.gateway.bundle.callMessage",
+    "hostUrl": "127.0.0.1:9987",
+    "predicates": [
+        {"name": "Path","args": {"pattern": "/jd"}}
+    ],
+    "filters": [
+        {"name": "AddRequestHeader","args": {"_genkey_0": "header","_genkey_1": "addHeader"}},
+        {"name": "AddRequestParameter", "args": {"_genkey_0": "param","_genkey_1": "addParam"}}
+    ]
+    }
      * */
-    @PostMapping(value = "/route/add")
+    @RequestMapping(value = "/route/add", method = RequestMethod.POST)
     public ResponseResult add(@RequestBody GatewayRouteDefinition gatewayRouteDefinition) {
         return routeService.add(gatewayRouteDefinition);
     }

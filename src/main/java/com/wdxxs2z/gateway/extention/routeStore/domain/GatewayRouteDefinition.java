@@ -3,23 +3,50 @@ package com.wdxxs2z.gateway.extention.routeStore.domain;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.cloud.gateway.filter.FilterDefinition;
+import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.util.MultiValueMap;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
-public class GatewayRouteDefinition extends RouteDefinition{
+@Builder(toBuilder = true)
+public class GatewayRouteDefinition implements Serializable {
 
-    private String serviceName;
+    private static final long serialVersionUID = 1L;
 
-    private String uniqueId;
+    /**
+     * 路由ID
+     */
+    private String id;
 
-    private String method;
-
+    /**
+     * 目标url
+     */
     private String hostUrl;
 
+    /**
+     * 执行顺序
+     */
     @Builder.Default
-    private MultiValueMap<String, String> mappingField;
+    private int order = 0;
+
+    /**
+     * 断言列表配置
+     */
+    @Builder.Default
+    private List<PredicateDefinition> predicates = new ArrayList<>();
+
+    /**
+     * 过滤器列表配置
+     */
+    @Builder.Default
+    private List<FilterDefinition> filters = new ArrayList<>();
 
 }

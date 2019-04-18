@@ -1,5 +1,5 @@
 server:
-  port: 8084
+  port: 8085
 
 spring:
   main:
@@ -18,6 +18,13 @@ spring:
             - Path=/order/**
           filters:
           - StripPrefix=1
+        - id: com.biz.service.CallerService
+          uri: http://127.0.0.1:8085
+          predicates:
+            - Path=/api/bizCaller
+          filters:
+          # 第一个参数是开启过滤器，第二个是rpc对应的接口，第三个对应的是接口方法
+          - SofaAdapt=true,cloud.provider.facade.CallerService,datasource
 
 # LOGGING Config
 logging:

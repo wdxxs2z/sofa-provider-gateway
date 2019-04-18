@@ -32,7 +32,7 @@ public class SofaProtocolAdapt implements ProtocolAdapt {
     public Object doGenericInvoke(String interfaceClass, String methodName, List<Map<String, Object>> params) {
 
         if (applicationConfig == null || registryConfig == null) {
-            return "配置为空";
+            return "SOFA注册中心配置为空";
         }
 
         GenericService genericService;
