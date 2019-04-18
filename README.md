@@ -2,7 +2,7 @@
 
 只是简单实现一个 SOFA RPC 服务网关，比较粗糙，作为一个思路扩展
 
-# SOFA rpc interface 接口定义
+## SOFA rpc interface 接口定义
 
 ```
 cloud.provider.facade.CallerService
@@ -16,7 +16,7 @@ public Map<String, Object> datasource(String name) {
 }
 ```
 
-# SOFA adapt filter 过滤器使用方式
+## SOFA adapt filter 过滤器使用方式
 
 ID：即路由标识，自定义和业务区分即可
 
@@ -32,7 +32,33 @@ SofaAdapt: 泛化调用过滤器
   - SofaAdapt=true,cloud.provider.facade.CallerService,datasource
 ```
 
-# SOFA adapt request 网关发起请求
+## redis dynamic route 动态路由
+
+RouteDefinitionRepository 的redis实现, 并添加restful接口
+
+```
+/**
+{
+"id": "com.wdxxs2z.gateway.bundle.callMessage",
+"hostUrl": "127.0.0.1:9987",
+"predicates": [
+    {"name": "Path","args": {"pattern": "/api/bizMessage"}}
+],
+"filters": [
+    {"name": "SofaAdapt","args": {
+        "_genkey_0": "true","_genkey_1": "cloud.provider.facade.CallerService","_genkey_3": "message"
+    }
+    }
+]
+}
+* */
+@RequestMapping(value = "/route/add", method = RequestMethod.POST)
+public ResponseResult add(@RequestBody GatewayRouteDefinition gatewayRouteDefinition) {
+    return routeService.add(gatewayRouteDefinition);
+}
+```
+
+## SOFA adapt request 网关发起请求
 
 post请求   xxxx/api/bizCaller
 
@@ -46,7 +72,7 @@ post请求   xxxx/api/bizCaller
 }
 ```
 
-# bundle design 思路是作为客户端，自定义一个方法注解，扫描后自动注册到服务网关，类似于坐标(未完成)
+## bundle design 思路是作为客户端，自定义一个方法注解，扫描后自动注册到服务网关，类似于坐标
 
 通过反射可以拿到相关bean的接口，方法，参数等信息
 
