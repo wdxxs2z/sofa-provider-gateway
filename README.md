@@ -22,6 +22,8 @@ ID：即路由标识，自定义和业务区分即可
 
 SofaAdapt: 泛化调用过滤器
 
+可以不用指定入参参数类型
+
 ```
 - id: com.biz.service.CallerService
   uri: http://127.0.0.1:8085
@@ -30,6 +32,18 @@ SofaAdapt: 泛化调用过滤器
   filters:
   # 第一个参数是开启过滤器，第二个是rpc对应的接口，第三个对应的是接口方法
   - SofaAdapt=true,cloud.provider.facade.CallerService,datasource
+```
+
+也可以自己指定入参，格式是{"parameterName_1":"objectType_1","parameterName_2":"objectType_2"}
+
+```
+- id: com.biz.service.CallerService
+  uri: http://127.0.0.1:8085
+  predicates:
+    - Path=/api/bizCaller
+  filters:
+  # 第一个参数是开启过滤器，第二个是rpc对应的接口，第三个对应的是接口方法,第三个是入参参数类型
+  - SofaAdapt=true,cloud.provider.facade.CallerService,datasource,{"name":"java.lang.String"}
 ```
 
 ## redis dynamic route 动态路由
@@ -60,6 +74,8 @@ public ResponseResult add(@RequestBody GatewayRouteDefinition gatewayRouteDefini
 
 ## SOFA adapt request 网关发起请求
 
+过滤器没有入参参数定义的，需要自己写清楚入参参数类型
+
 post请求   xxxx/api/bizCaller
 
 ```
@@ -67,6 +83,18 @@ post请求   xxxx/api/bizCaller
   "params": [
     {
       "java.lang.String": "heolofasdfdfadsf"
+    }
+  ]
+}
+```
+
+过滤器有入参参数定义的，请求时，只需要知道参数名是什么就可以了，会到路由的参数列表里找
+
+```
+{
+  "params": [
+    {
+      "name": "heol"
     }
   ]
 }

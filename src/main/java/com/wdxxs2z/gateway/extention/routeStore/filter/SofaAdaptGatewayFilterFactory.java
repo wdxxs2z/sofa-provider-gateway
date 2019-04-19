@@ -1,6 +1,7 @@
 package com.wdxxs2z.gateway.extention.routeStore.filter;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.wdxxs2z.gateway.adapt.sofa.SofaProtocolAdapt;
 import com.wdxxs2z.gateway.extention.routeStore.domain.ResponseResult;
@@ -21,9 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class SofaAdaptGatewayFilterFactory extends AbstractGatewayFilterFactory<SofaAdaptGatewayFilterFactory.Config> {
@@ -39,7 +38,12 @@ public class SofaAdaptGatewayFilterFactory extends AbstractGatewayFilterFactory<
 
     @Override
     public List<String> shortcutFieldOrder() {
-        return Arrays.asList("enabled", "interfaceName", "method");
+        return Arrays.asList(
+                "enabled",
+                "interfaceName",
+                "method",
+                "inputParams"
+        );
     }
 
     @Override
@@ -82,10 +86,34 @@ public class SofaAdaptGatewayFilterFactory extends AbstractGatewayFilterFactory<
              * */
             ServerRequest serverRequest = new DefaultServerRequest(exchange);
             return serverRequest.bodyToMono(String.class).flatMap(body -> {
+
                 Map<String, Object> requestObject = JSON.parseObject(body, new TypeReference<Map<String, Object>>() {
                 });
                 List<Map<String, Object>> args = (List<Map<String, Object>>)requestObject.get("params");
-                Object genericInvoke = sofaProtocolAdapt.doGenericInvoke(interfaceName, method, args);
+                Object genericInvoke = null;
+
+                // config中有入参定义，前提是，定义这个参数的时候，需要知道参数对应的参数类型
+                String inputParams = config.getInputParams();
+                if (inputParams != null) {
+                    Map<String, String> convertParams = JSON.parseObject(inputParams, Map.class);
+
+                    List<Map<String, Object>> newParams = new ArrayList<>();
+                    args.forEach(arg -> {
+                        arg.entrySet().forEach(type ->{
+                            convertParams.entrySet().forEach(inputParam -> {
+                                if (inputParam.getKey().equals(type.getKey())) {
+                                    Map<String, Object> newP = new HashMap<>();
+                                    newP.put(inputParam.getValue(), type.getValue());
+                                    newParams.add(newP);
+                                }
+                            });
+                        });
+                    });
+                    genericInvoke = sofaProtocolAdapt.doGenericInvoke(interfaceName, method, newParams);
+                }else{
+                    genericInvoke = sofaProtocolAdapt.doGenericInvoke(interfaceName, method, args);
+                }
+
                 String jsonString = JSON.toJSONString(genericInvoke);
                 // 将返回值填入response
                 ServerHttpResponse response = exchange.getResponse();
@@ -96,7 +124,6 @@ public class SofaAdaptGatewayFilterFactory extends AbstractGatewayFilterFactory<
         };
     }
 
-    // 配置
     public static class Config {
 
         private boolean enabled;
@@ -104,6 +131,8 @@ public class SofaAdaptGatewayFilterFactory extends AbstractGatewayFilterFactory<
         private String interfaceName;
 
         private String method;
+
+        private String inputParams;
 
         public Config() {}
 
@@ -128,6 +157,14 @@ public class SofaAdaptGatewayFilterFactory extends AbstractGatewayFilterFactory<
         }
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
+        }
+
+        public String getInputParams() {
+            return inputParams;
+        }
+
+        public void setInputParams(String inputParams) {
+            this.inputParams = inputParams;
         }
     }
 }

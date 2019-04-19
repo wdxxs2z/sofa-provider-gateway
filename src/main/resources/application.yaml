@@ -23,8 +23,8 @@ spring:
           predicates:
             - Path=/api/bizCaller
           filters:
-          # 第一个参数是开启过滤器，第二个是rpc对应的接口，第三个对应的是接口方法
-          - SofaAdapt=true,cloud.provider.facade.CallerService,datasource
+          # 第一个参数是开启过滤器，第二个是rpc对应的接口，第三个对应的是接口方法,第四个是可选的，指定 入参参数名:入参参数类型
+          - SofaAdapt=true,cloud.provider.facade.CallerService,datasource,{"name":"java.lang.String"}
 
 # LOGGING Config
 logging:
