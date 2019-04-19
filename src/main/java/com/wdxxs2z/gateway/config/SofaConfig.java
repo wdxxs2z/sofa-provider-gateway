@@ -4,8 +4,11 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.time.Duration;
 
 @Configuration
 public class SofaConfig {
@@ -33,6 +36,13 @@ public class SofaConfig {
 
     @Value("${com.sofa.registry.address}")
     private String registryAddress;
+
+    @Bean
+    public NettyReactiveWebServerFactory getNettyReactiveWebServerFactory() {
+        NettyReactiveWebServerFactory nettyReactiveWebServerFactory = new NettyReactiveWebServerFactory();
+        nettyReactiveWebServerFactory.setLifecycleTimeout(Duration.ofMillis(20000));
+        return nettyReactiveWebServerFactory;
+    }
 
     @Bean
     public ApplicationConfig applicationConfig() {

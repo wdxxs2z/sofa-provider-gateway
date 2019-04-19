@@ -29,7 +29,9 @@ public class GatewayBundleProcessor implements BeanPostProcessor {
                     Class<?>[] interfaces = clazz.getInterfaces();
 
                     System.out.println("接口名称：" + interfaces[0].getName() +
-                            " ,接口对象：" + interfaces[0] + " ,方法名称：" + method.getName() +
+                            " ,接口对象：" + interfaces[0] +
+                            " ,方法名称：" + method.getName() +
+                            " ,方法参数：" + method.getParameterTypes() +
                             " ,注解定义：" + gatewayOperationType.value() +
                             " ,注解名称：" + gatewayOperationType.name() +
                             " ,注解描述：" + gatewayOperationType.desc());
