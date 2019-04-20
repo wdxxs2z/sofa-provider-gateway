@@ -1,6 +1,6 @@
 # SOFA provider gateway demo
 
-只是简单实现一个 SOFA RPC 服务网关，比较粗糙，作为一个思路扩展
+只是简单实现一个 SOFA RPC 服务网关，比较粗糙，作为一个思路扩展，学习使用。
 
 ## SOFA rpc interface 接口定义
 
@@ -20,7 +20,7 @@ public Map<String, Object> datasource(String name) {
 
 ID：即路由标识，自定义和业务区分即可
 
-SofaAdapt: 泛化调用过滤器
+SofaAdapt: 泛化调用过滤器，内置一个缓存，放置GenericService引用对象，提高访问效率。
 
 可以不用指定入参参数类型
 

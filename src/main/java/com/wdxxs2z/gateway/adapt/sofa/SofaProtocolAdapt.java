@@ -3,7 +3,6 @@ package com.wdxxs2z.gateway.adapt.sofa;
 import com.alipay.hessian.generic.model.GenericObject;
 import com.alipay.sofa.rpc.api.GenericService;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.wdxxs2z.gateway.adapt.ProtocolAdapt;
 import org.slf4j.Logger;
@@ -23,8 +22,6 @@ public class SofaProtocolAdapt implements ProtocolAdapt {
     @Autowired
     private RegistryConfig registryConfig;
 
-    private static Map<String, GenericService> cache = new HashMap<>();
-
     /**
      * [{"java.lang.String":"hello"},{"com.alipay.demo.Person":{"age":10,"username":"tony"}}]
      * */
@@ -35,22 +32,7 @@ public class SofaProtocolAdapt implements ProtocolAdapt {
             return "SOFA注册中心配置为空";
         }
 
-        GenericService genericService;
-
-        // 服务接口引用
-        if (cache.get(interfaceClass) != null) {
-            genericService = cache.get(interfaceClass);
-        }else {
-            ConsumerConfig<GenericService> consumerConfig = new ConsumerConfig<GenericService>()
-                    .setInterfaceId(interfaceClass)
-                    .setApplication(applicationConfig)
-                    .setGeneric(true)
-                    .setTimeout(10000)
-                    .setRegistry(registryConfig);
-
-            genericService = consumerConfig.refer();
-            cache.put(interfaceClass, genericService);
-        }
+        GenericService genericService = SofaServiceCache.getService(interfaceClass, interfaceClass, applicationConfig, registryConfig);
 
         List<String> types = new ArrayList<>();
         List<Object> args = new ArrayList<>();

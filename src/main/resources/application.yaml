@@ -32,12 +32,12 @@ logging:
     root: INFO
   path: ./logs/gateway
 
-# Gateway config
+# Gateway redis config
 gateway:
   store:
     redis:
       enable: true
-# Gateway ui | http://localhost:8080/actuator/gateway/routes
+# Gateway ui config default ui: http://localhost:8080/actuator/gateway/routes
 management:
   endpoints:
     web:
@@ -46,6 +46,8 @@ management:
   endpoint:
     health:
       show-details: ALWAYS
+    shutdown:
+      enabled: true
 
 # SOFA config
 com:
