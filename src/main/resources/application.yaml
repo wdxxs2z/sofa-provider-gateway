@@ -9,6 +9,14 @@ spring:
   redis:
     host: 127.0.0.1
     port: 6379
+    timeout: 5000
+    lettuce:
+      shutdown-timeout: 5000
+      pool:
+        min-idle: 0
+        max-wait: -1
+        max-idle: 8
+        max-active: 8
   cloud:
     gateway:
       routes:
@@ -29,8 +37,8 @@ spring:
 # LOGGING Config
 logging:
   level:
-    root: INFO
-  path: ./logs/gateway
+    root: DEBUG
+  path: ./logs
 
 # Gateway redis config
 gateway:

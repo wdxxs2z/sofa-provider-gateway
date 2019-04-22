@@ -9,7 +9,9 @@ import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
@@ -44,20 +46,38 @@ public class DynamicRouteService implements ApplicationEventPublisherAware {
         routeDefinitionWriter.save(Mono.just(routeDefinition)).subscribe();
         routeDefinitionWriter.save(Mono.just(routeDefinition)).subscribe();
         notifyChanged();
-        return new ResponseResult();
+        return new ResponseResult(HttpStatus.OK.value(), "路由创建成功", gatewayRouteDefinition);
     }
 
     // 删除路由
     public ResponseResult delete(String routeId) {
         routeDefinitionWriter.delete(Mono.just(routeId)).subscribe();
-        return new ResponseResult();
+        return new ResponseResult(HttpStatus.OK.value(), "路由删除成功", routeId);
     }
 
     // 更新路由
     public ResponseResult update(GatewayRouteDefinition gatewayRouteDefinition) {
         this.delete(gatewayRouteDefinition.getId());
         this.add(gatewayRouteDefinition);
-        return new ResponseResult();
+        return new ResponseResult(HttpStatus.OK.value(), "路由更新成功", gatewayRouteDefinition);
+    }
+
+    // 获取一条路由
+    public Mono<GatewayRouteDefinition> getOne(String routeId){
+        Mono<RouteDefinition> RouteDefinition = routeDefinitionWriter.findOne(Mono.just(routeId));
+        return RouteDefinition.filter(r -> r!=null).flatMap(r -> {
+            GatewayRouteDefinition gatewayRouteDefinition = new GatewayRouteDefinition();
+            gatewayRouteDefinition.setId(routeId);
+            gatewayRouteDefinition.setFilters(r.getFilters());
+            gatewayRouteDefinition.setHostUrl(r.getUri().toString());
+            gatewayRouteDefinition.setPredicates(r.getPredicates());
+            return Mono.just(gatewayRouteDefinition);
+        });
+    }
+
+    // 获取所有路由
+    public Flux<RouteDefinition> getRoutes() {
+        return routeDefinitionWriter.getRouteDefinitions();
     }
 
     // 删除所有路由
