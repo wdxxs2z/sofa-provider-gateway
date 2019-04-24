@@ -37,7 +37,7 @@ spring:
 # LOGGING Config
 logging:
   level:
-    root: DEBUG
+    root: INFO
   path: ./logs
 
 # Gateway redis config
