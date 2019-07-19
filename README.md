@@ -17,9 +17,9 @@ com:
     mw:
       access: xxx
       secret: xxx
-  sofa:
-    registry:
-      address: local:///Users/xxxx/localFileRegistry/localRegistry.reg
+sofa:
+  registry:
+    address: local:///Users/xxxx/localFileRegistry/localRegistry.reg
 run:
   mode: DEV
 ```

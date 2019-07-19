@@ -37,7 +37,11 @@ spring:
 # LOGGING Config
 logging:
   level:
-    root: INFO
+    com:
+      wdxxs2z:
+        gateway: INFO
+    org:
+      springframework: INFO
   path: ./logs
 
 # Gateway redis config
@@ -61,15 +65,16 @@ management:
 com:
   alipay:
     env: shared
-    instanceid: xxxx
+    instanceid: 000001
   antcloud:
     antvip:
-      endpoint: xxx
+      endpoint: acvip-inner.sofa.ynet.com
     mw:
-      access: xxx
-      secret: xxx
-  sofa:
-    registry:
-      address: local:///Users/yuanshaopeng/localFileRegistry/localRegistry.reg
+      access:
+      secret:
+sofa:
+  registry:
+    address: dsr:///127.0.0.1:9001
+    # local:///Users/yuanshaopeng/localFileRegistry/localRegistry.reg
 run:
-  mode: DEV
+  mode: NORMAL

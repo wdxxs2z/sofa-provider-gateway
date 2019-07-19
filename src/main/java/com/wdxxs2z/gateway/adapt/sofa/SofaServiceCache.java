@@ -38,9 +38,13 @@ public class SofaServiceCache {
                             .setInterfaceId(interfaceClass)
                             .setApplication(applicationConfig)
                             .setGeneric(true)
-                            .setTimeout(10000)
-                            .setRegistry(registryConfig);
+                            .setProtocol("bolt");
+                    consumerConfig.setRegistry(registryConfig)
+                            .setConnectTimeout(5000)
+                            .setTimeout(5000);
+
                     GenericService s = consumerConfig.refer();
+
                     return s;
             });
         }catch (Exception e){

@@ -1,13 +1,11 @@
 package com.wdxxs2z.gateway.config;
 
-import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
+import com.antcloud.antvip.client.AntVipConfigure;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.time.Duration;
 
 @Configuration
 public class SofaConfig {
@@ -33,32 +31,41 @@ public class SofaConfig {
     @Value("${run.mode}")
     private String runMode;
 
-    @Value("${com.sofa.registry.address}")
+    @Value("${sofa.registry.address}")
     private String registryAddress;
 
     @Bean
     public ApplicationConfig applicationConfig() {
 
-        if (StringUtils.isEmpty(runMode)) {
+        if (runMode == null) {
             System.setProperty("run.mode", "DEV");
-        }else if (!StringUtils.isEmpty(runMode) && StringUtils.equals(runMode, "DEV")) {
+        }else if (runMode != null && runMode == "DEV") {
             System.setProperty("run.mode", runMode);
         }else {
+            AntVipConfigure config = new AntVipConfigure();
+
             System.setProperty("run.mode", runMode);
             System.setProperty("com.alipay.env", alipayEnv);
             System.setProperty("com.alipay.instanceid", alipayInstanceId);
             System.setProperty("com.antcloud.antvip.endpoint", antcloudEndpoint);
 
-            if (StringUtils.isEmpty(antcloudAccess)) {
+            config.setInstanceId(alipayInstanceId);
+            config.setEndPoint(antcloudEndpoint);
+            config.setAppName(appName);
+
+            if (antcloudAccess!=null) {
                 System.setProperty("com.antcloud.mw.access", antcloudAccess);
+                config.setAccessKey(antcloudAccess);
             }
-            if (StringUtils.isEmpty(antcloudSecret)) {
+            if (antcloudSecret !=null) {
                 System.setProperty("com.antcloud.mw.secret", antcloudSecret);
+                config.setAccessSecret(antcloudSecret);
             }
         }
 
         ApplicationConfig appConfiguration = new ApplicationConfig();
         appConfiguration.setAppName(appName);
+
         return appConfiguration;
     }
 
@@ -73,11 +80,12 @@ public class SofaConfig {
         registryConfig.setProtocol(protocol);
         if (protocol.equals("local")) {
             registryConfig.setFile(address);
+        }else if (protocol.contains("dsr")){
         }else {
             registryConfig.setAddress(address);
         }
-        //registryConfig.setSubscribe(true);
-        registryConfig.setConnectTimeout(3000);
+        registryConfig.setSubscribe(true);
+        registryConfig.setConnectTimeout(5000);
 
         return registryConfig;
     }
