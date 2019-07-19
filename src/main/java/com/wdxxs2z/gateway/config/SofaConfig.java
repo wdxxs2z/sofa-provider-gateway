@@ -11,28 +11,28 @@ import org.springframework.context.annotation.Configuration;
 public class SofaConfig {
 
     @Value("${spring.application.name}")
-    private String appName;
+    String appName;
 
     @Value("${com.alipay.env:shared}")
-    private String alipayEnv;
+    String alipayEnv;
 
     @Value("${com.alipay.instanceid}")
-    private String alipayInstanceId;
+    String alipayInstanceId;
 
     @Value("${com.antcloud.antvip.endpoint}")
-    private String antcloudEndpoint;
+    String antcloudEndpoint;
 
     @Value("${com.antcloud.mw.access}")
-    private String antcloudAccess;
+    String antcloudAccess;
 
     @Value("${com.antcloud.mw.secret}")
-    private String antcloudSecret;
+    String antcloudSecret;
 
     @Value("${run.mode}")
-    private String runMode;
+    String runMode;
 
     @Value("${sofa.registry.address}")
-    private String registryAddress;
+    String registryAddress;
 
     @Bean
     public ApplicationConfig applicationConfig() {
@@ -72,21 +72,24 @@ public class SofaConfig {
     @Bean
     public RegistryConfig registryConfig() {
 
-        int startIndex = registryAddress.indexOf("://");
-        String protocol = registryAddress.substring(0, startIndex);
-        String address = registryAddress.substring(startIndex + 3);
-
         RegistryConfig registryConfig = new RegistryConfig();
-        registryConfig.setProtocol(protocol);
-        if (protocol.equals("local")) {
-            registryConfig.setFile(address);
-        }else if (protocol.contains("dsr")){
-        }else {
+
+        if (runMode.equalsIgnoreCase("DEV")) {//dev环境，直接走local
+            String usrHome = System.getProperty("user.home");
+            registryConfig.setProtocol("local");
+            registryConfig.setFile(usrHome + "/localFileRegistry/localRegistry.reg");
+        } else if (registryAddress != null || !registryConfig.equals("")) {//显示指定某个注册中心
+            int startIndex = registryAddress.indexOf("://");
+            String protocol = registryAddress.substring(0, startIndex);
+            String address = registryAddress.substring(startIndex + 3);
             registryConfig.setAddress(address);
+            registryConfig.setProtocol(protocol);
+        } else {//DSR企业版注册中心
+            registryConfig.setProtocol("dsr");
         }
+
         registryConfig.setSubscribe(true);
         registryConfig.setConnectTimeout(5000);
-
         return registryConfig;
     }
 }

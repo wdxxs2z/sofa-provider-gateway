@@ -17,10 +17,10 @@ public class SofaProtocolAdapt implements ProtocolAdapt {
     private final static Logger LOGGER = LoggerFactory.getLogger(SofaProtocolAdapt.class);
 
     @Autowired
-    private ApplicationConfig applicationConfig;
+    ApplicationConfig applicationConfig;
 
     @Autowired
-    private RegistryConfig registryConfig;
+    RegistryConfig registryConfig;
 
     /**
      * [{"java.lang.String":"hello"},{"com.alipay.demo.Person":{"age":10,"username":"tony"}}]
@@ -29,6 +29,7 @@ public class SofaProtocolAdapt implements ProtocolAdapt {
     public Object doGenericInvoke(String interfaceClass, String methodName, List<Map<String, Object>> params) {
 
         if (applicationConfig == null || registryConfig == null) {
+            LOGGER.error("SOFA注册中心配置为空");
             return "SOFA注册中心配置为空";
         }
 
@@ -59,7 +60,8 @@ public class SofaProtocolAdapt implements ProtocolAdapt {
         Object genericObjectInvoke = null;
         String[] genericTypes =new String[types.size()];
         try {
-            genericObjectInvoke = genericService.$genericInvoke(methodName,
+            genericObjectInvoke = genericService.$genericInvoke(
+                    methodName,
                     types.toArray(genericTypes),
                     args.toArray());
         }catch (Exception e){

@@ -42,9 +42,7 @@ public class SofaServiceCache {
                     consumerConfig.setRegistry(registryConfig)
                             .setConnectTimeout(5000)
                             .setTimeout(5000);
-
                     GenericService s = consumerConfig.refer();
-
                     return s;
             });
         }catch (Exception e){

@@ -74,7 +74,7 @@ com:
       secret:
 sofa:
   registry:
-    address: dsr:///127.0.0.1:9001
+    address:
     # local:///Users/yuanshaopeng/localFileRegistry/localRegistry.reg
 run:
-  mode: NORMAL
+  mode: DEV
