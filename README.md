@@ -6,6 +6,10 @@
 
 ## 1. 配置注册中心,默认走本地注册中心
 
+mode: DEV 走本地模式
+mode: 不写或NORMAL/TEST走企业版DSR
+如果配置了sofa.registry.address，则走配置的注册中心
+
 ```
 com:
   alipay:
@@ -19,7 +23,7 @@ com:
       secret: xxx
 sofa:
   registry:
-    address: local:///Users/xxxx/localFileRegistry/localRegistry.reg
+    address:
 run:
   mode: DEV
 ```
@@ -123,7 +127,7 @@ SofaAdapt: 泛化调用过滤器：内置一个缓存，放置GenericService引�
 
 ## 6. bundle design
 
-思路: 作为客户端，自定义一个方法注解，扫描后自动注册到服务网关，类似于坐标
+思路: 作为客户端，自定义一个方法注解，扫描后自动注册到服务网关，类似于坐标，一个引子，未开发
 
 通过反射可以拿到相关bean的接口，方法，参数等信息
 
