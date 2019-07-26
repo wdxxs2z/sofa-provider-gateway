@@ -77,4 +77,4 @@ sofa:
     address:
     # local:///Users/yuanshaopeng/localFileRegistry/localRegistry.reg
 run:
-  mode: DEV
+  mode: NORMAL

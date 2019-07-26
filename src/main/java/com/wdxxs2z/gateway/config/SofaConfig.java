@@ -3,6 +3,7 @@ package com.wdxxs2z.gateway.config;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.antcloud.antvip.client.AntVipConfigure;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -73,19 +74,23 @@ public class SofaConfig {
     public RegistryConfig registryConfig() {
 
         RegistryConfig registryConfig = new RegistryConfig();
+        String cloudRunMode = System.getProperty("run.mode");
 
-        if (runMode.equalsIgnoreCase("DEV")) {//dev环境，直接走local
+        if (cloudRunMode.equalsIgnoreCase("DEV")) {//dev环境，直接走local
             String usrHome = System.getProperty("user.home");
             registryConfig.setProtocol("local");
             registryConfig.setFile(usrHome + "/localFileRegistry/localRegistry.reg");
-        } else if (registryAddress != null || !registryConfig.equals("")) {//显示指定某个注册中心
-            int startIndex = registryAddress.indexOf("://");
-            String protocol = registryAddress.substring(0, startIndex);
-            String address = registryAddress.substring(startIndex + 3);
-            registryConfig.setAddress(address);
-            registryConfig.setProtocol(protocol);
-        } else {//DSR企业版注册中心
-            registryConfig.setProtocol("dsr");
+        } else if (cloudRunMode.equalsIgnoreCase("NORMAL")
+                || cloudRunMode.equalsIgnoreCase("TEST")) {
+            if (StringUtils.isNotEmpty(registryAddress)) {// 显示指定注册中心
+                int startIndex = registryAddress.indexOf("://");
+                String protocol = registryAddress.substring(0, startIndex);
+                String address = registryAddress.substring(startIndex + 3);
+                registryConfig.setAddress(address);
+                registryConfig.setProtocol(protocol);
+            } else {// 企业版注册中心
+                registryConfig.setProtocol("dsr");
+            }
         }
 
         registryConfig.setSubscribe(true);
